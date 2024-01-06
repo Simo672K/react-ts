@@ -1,18 +1,23 @@
 import { useForm, SubmitHandler } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { clsx } from 'clsx'
 
 type FormComponentProps = {};
 
-type FromData = {
-  username: string;
-  password: string;
-};
+const schema = z.object({
+  username: z.string().min(8, {message: "Username should be at least 8 characters."}),
+  password: z.string().min(1, {message: "Password is required."}),
+});
+
+type FromData = z.infer<typeof schema>;
 
 const Form: React.FC<FormComponentProps> = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<FromData>();
+    formState: { errors, isValid },
+  } = useForm<FromData>({resolver: zodResolver(schema)});
 
   const submitHandler: SubmitHandler<FromData> = (data) => console.log(data);
 
@@ -32,16 +37,13 @@ const Form: React.FC<FormComponentProps> = () => {
               className="form-control"
               id="exampleInputEmail1"
               aria-describedby="emailHelp"
-              {...register("username", {required: true, minLength: 8})}
+              {...register("username")}
             />
-            {
-              errors.username?.type === "required" &&
-              <p className="text-danger fw-medium mt-1">Username field is required.</p>
-            }
-            {
-              errors.username?.type === "minLength" &&
-              <p className="text-danger fw-medium mt-1">Username length at least 8 characters.</p>
-            }
+            {errors.username && (
+              <p className="text-danger fw-medium mt-1">
+                {errors.username.message}
+              </p>
+            )}
           </div>
           <div className="mb-3">
             <label htmlFor="exampleInputPassword1" className="form-label">
@@ -51,14 +53,15 @@ const Form: React.FC<FormComponentProps> = () => {
               type="password"
               className="form-control"
               id="exampleInputPassword1"
-              {...register("password", {required: true})}
-              />
-              {
-                errors.password?.type === "required" &&
-                <p className="text-danger fw-medium mt-1">Password field is required.</p>
-              }
+              {...register("password", { required: true })}
+            />
+            {errors.password && (
+              <p className="text-danger fw-medium mt-1">
+                {errors.password.message}
+              </p>
+            )}
           </div>
-          <button className="btn btn-primary w-100" type="submit">
+          <button disabled={!isValid} className={clsx("btn btn-primary w-100", !isValid && "disabled")} type="submit">
             Login
           </button>
         </form>
