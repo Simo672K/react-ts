@@ -1,4 +1,5 @@
 import Form from "./components/Form";
+import ProductList from "./components/ProductList";
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
           <Form/>
         </div>
       </div>
+      <ProductList/>
     </div>
   );
 }
